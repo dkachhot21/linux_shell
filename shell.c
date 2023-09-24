@@ -1,43 +1,58 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+#include <sys/types.h>
 
-#define MAX_INPUT_LENGTH 50
-#define clear() printf("\033[H\033[J")
-
-void start()
+void parse(char *line, char **argv)
 {
-    clear();
-    char *username = getenv("USER");
-    char *dir = getcwd(NULL, 0);
-    printf("\n%s@%s> ", username, dir);
+    while (*line != '\0')
+    { /* if not the end of line ....... */
+        while (*line == ' ' || *line == '\t' || *line == '\n')
+            *line++ = '\0'; /* replace white spaces with 0    */
+        *argv++ = line;     /* save the argument position     */
+        while (*line != '\0' && *line != ' ' &&
+               *line != '\t' && *line != '\n')
+            line++; /* skip the argument until ...    */
+    }
+    *argv = '\0'; /* mark the end of argument list  */
 }
 
-int main()
+void execute(char **argv)
 {
-    start();
-    char input[MAX_INPUT_LENGTH];
-    scanf("%[^\n]", input);
-    int i = 0;
-    char *token = strtok(input, " ");
-    char *args[50];
-    while (token != NULL)
-    {
-        args[i] = token;
-        token = strtok(NULL, " ");
-        i++;
+    pid_t pid;
+    int status;
+
+    if ((pid = fork()) < 0)
+    { /* fork a child process           */
+        printf("*** ERROR: forking child process failed\n");
+        exit(1);
     }
-    args[i] = NULL;
-    int pid=fork();
-    if (pid<0)
-    {
-        exit(0);
+    else if (pid == 0)
+    { /* for the child process:         */
+        if (execvp(*argv, argv) < 0)
+        { /* execute the command  */
+            printf("*** ERROR: exec failed\n");
+            exit(1);
+        }
     }
-    else if (pid==0)
-    {
-        execvp(args[0],args);
+    else
+    {                                /* for the parent:      */
+        while (wait(&status) != pid) /* wait for completion  */
+            ;
     }
-    
-    return main;
+}
+
+void main(void)
+{
+    char line[1024]; /* the input line                 */
+    char *argv[64];  /* the command line argument      */
+
+    while (1)
+    {                        /* repeat until done ....         */
+        printf("Shell -> "); /*   display a prompt             */
+        gets(line);          /*   read in the command line     */
+        printf("\n");
+        parse(line, argv);                /*   parse the line               */
+        if (strcmp(argv[0], "exit") == 0) /* is it an "exit"?     */
+            exit(0);                      /*   exit if it is                */
+        execute(argv);                    /* otherwise, execute the command */
+    }
 }
