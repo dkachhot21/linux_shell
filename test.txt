@@ -5,3 +5,7 @@ void start()
     char *dir = getcwd(NULL, 0);
     printf("\n%s@%s> ", username, dir);
 }
+
+
+
+#define clear() printf("\033[H\033[J")
