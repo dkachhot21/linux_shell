@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+
 #define clear() printf("\033[H\033[J")
 #define size 1024
 
@@ -19,6 +20,30 @@ void parse(char *line, char **argv)
             line++; /* skip the argument until ...    */
     }
     *argv = '\0'; /* mark the end of argument list  */
+}
+
+void cd_case(char **argv)
+{
+    if (argv[1] == NULL)
+    {
+        const char *home = getenv("HOME");
+        if (home != NULL)
+        {
+            if (chdir(home) == 0)
+                return;
+            else
+                perror("cd");
+        }
+        else
+            fprintf(stderr, "cd:Home environment variable is not set\n");
+    }
+    else
+    {
+        if (chdir(argv[1]) == 0)
+            return;
+        else
+            perror("CD");
+    }
 }
 
 void execute(char **argv)
@@ -71,8 +96,13 @@ void main(void)
         if (argv[0] == NULL)
             continue;                     // Handle empty input
         if (strcmp(argv[0], "exit") == 0) /* is it an "exit"?     */
-            exit(0);                      /*   exit if it is                */
-        execute(argv);                    /* otherwise, execute the command */
+            exit(0);                      /*   exit if it is    */
+        else if (strcmp(argv[0], "cd") == 0)
+        {
+            cd_case(argv);
+        }
+        else
+            execute(argv); /* otherwise, execute the command */
         printf("\n");
         free(dir);
     }
