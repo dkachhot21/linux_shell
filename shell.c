@@ -4,13 +4,15 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#define clear() printf("\033[H\033[J")
+#define size 1024
 
 void parse(char *line, char **argv)
 {
     while (*line != '\0')
     { /* if not the end of line ....... */
         while (*line == ' ' || *line == '\t' || *line == '\n')
-            *line++ = '\0'; /* replace white spaces with 0    */
+            *line++ = '\0'; /* replace white spaces with \0    */
         *argv++ = line;     /* save the argument position     */
         while (*line != '\0' && *line != ' ' &&
                *line != '\t' && *line != '\n')
@@ -46,19 +48,31 @@ void execute(char **argv)
 
 void main(void)
 {
-    char line[1024]; /* the input line                 */
+    char line[size]; /* the input line                 */
     char *argv[64];  /* the command line argument      */
+    clear();
 
     while (1)
     { /* repeat until done ....         */
         char *username = getenv("USER");
         char *dir = getcwd(NULL, 0);
-        printf("\n\033[0;32m%s\033[0m:\033[0;34m%s\033[0m$ ", username, dir); /*   display a prompt             */
-        gets(line);                                                           /*   read in the command line     */
-        printf("\n");
-        parse(line, argv);                /*   parse the line               */
+        printf("\033[0;32m%s\033[0m:\033[0;34m%s\033[0m$ ", username, dir); /*   display a prompt             */
+        if (fgets(line, size, stdin) == NULL)
+        {
+            perror("Input error");
+            exit(1);
+        }                               /*   read in the command line     */
+        size_t len = strlen(line);
+        if (len > 0 && line[len - 1] == '\n') //remove new line from the end of input
+        {
+            line[len - 1] = '\0';
+        }
+        parse(line, argv); /*   parse the line   */
+        if (argv[0] == NULL)
+            continue;                     // Handle empty input
         if (strcmp(argv[0], "exit") == 0) /* is it an "exit"?     */
             exit(0);                      /*   exit if it is                */
         execute(argv);                    /* otherwise, execute the command */
+        printf("\n");
     }
 }

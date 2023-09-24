@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <sys/types.h>
-
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#define size 1024
 void parse(char *line, char **argv)
 {
     while (*line != '\0')
@@ -22,14 +26,14 @@ void execute(char **argv)
 
     if ((pid = fork()) < 0)
     { /* fork a child process           */
-        printf("*** ERROR: forking child process failed\n");
+        perror("Fork error");
         exit(1);
     }
     else if (pid == 0)
     { /* for the child process:         */
         if (execvp(*argv, argv) < 0)
         { /* execute the command  */
-            printf("*** ERROR: exec failed\n");
+            perror("Command error");
             exit(1);
         }
     }
@@ -42,15 +46,26 @@ void execute(char **argv)
 
 void main(void)
 {
-    char line[1024]; /* the input line                 */
+    char line[size]; /* the input line                 */
     char *argv[64];  /* the command line argument      */
 
     while (1)
     {                        /* repeat until done ....         */
         printf("Shell -> "); /*   display a prompt             */
-        gets(line);          /*   read in the command line     */
+        if (fgets(line, sizeof(line), stdin) == NULL)
+        {
+            perror("Input error");
+            exit(1);
+        } /*   read in the command line     */
         printf("\n");
-        parse(line, argv);                /*   parse the line               */
+        size_t len = strlen(line);
+        if (len > 0 && line[len - 1] == '\n')
+        {
+            line[len - 1] = '\0';
+        }
+        parse(line, argv); /*   parse the line  */
+        if (argv[0] == NULL)
+            continue;                     // Handle empty input
         if (strcmp(argv[0], "exit") == 0) /* is it an "exit"?     */
             exit(0);                      /*   exit if it is                */
         execute(argv);                    /* otherwise, execute the command */
