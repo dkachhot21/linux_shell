@@ -19,20 +19,25 @@ int main()
     start();
     char input[MAX_INPUT_LENGTH];
     scanf("%[^\n]", input);
-    char processed[10][MAX_INPUT_LENGTH];
     int i = 0;
     char *token = strtok(input, " ");
-    const char* file=token;
     char *args[50];
     while (token != NULL)
     {
-        token = strtok(NULL, " ");
         args[i] = token;
+        token = strtok(NULL, " ");
         i++;
     }
     args[i] = NULL;
-    int pid =fork();
-    execvp(file,args);
+    int pid=fork();
+    if (pid<0)
+    {
+        exit(0);
+    }
+    else if (pid==0)
+    {
+        execvp(args[0],args);
+    }
     
     return main;
 }

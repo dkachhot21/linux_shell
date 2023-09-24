@@ -1,23 +1,19 @@
 #include<stdio.h>
 #include<string.h>
+#include<unistd.h>
+#include<stdlib.h>
 
 int main(){
-    char input[100];
-    scanf("%[^\n]",input);
-    char processed[10][50];
-    int i=0;
-    char * token = strtok(input," ");
-    do
+    int pid=fork();
+    char* args[]={"update",NULL};
+    if (pid<0)
     {
-        for (int j = 0; j < strlen(token); j++)
-            processed[i][j]=token[j];
-        token = strtok(NULL," ");
-        i++;
-    } while (token!=NULL);
-    printf("%ld",strlen(processed[0]));
-    for (int i = 0; i < 10; i++)
-    {
-        printf("%s\n",processed[i]);
+        exit(0);
     }
+    else if (pid==0)
+    {
+        execvp("apt",args);
+    }
+    
     return 0;
 }
