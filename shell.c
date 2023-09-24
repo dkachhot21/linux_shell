@@ -61,9 +61,9 @@ void main(void)
         {
             perror("Input error");
             exit(1);
-        }                               /*   read in the command line     */
+        } /*   read in the command line     */
         size_t len = strlen(line);
-        if (len > 0 && line[len - 1] == '\n') //remove new line from the end of input
+        if (len > 0 && line[len - 1] == '\n') // remove new line from the end of input
         {
             line[len - 1] = '\0';
         }
@@ -74,5 +74,7 @@ void main(void)
             exit(0);                      /*   exit if it is                */
         execute(argv);                    /* otherwise, execute the command */
         printf("\n");
+        free(dir);
     }
+    free(argv);
 }
