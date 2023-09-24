@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <stdlib.h>
 
 void parse(char *line, char **argv)
 {
@@ -46,9 +50,11 @@ void main(void)
     char *argv[64];  /* the command line argument      */
 
     while (1)
-    {                        /* repeat until done ....         */
-        printf("Shell -> "); /*   display a prompt             */
-        gets(line);          /*   read in the command line     */
+    { /* repeat until done ....         */
+        char *username = getenv("USER");
+        char *dir = getcwd(NULL, 0);
+        printf("\n\033[0;32m%s\033[0m:\033[0;34m%s\033[0m$ ", username, dir); /*   display a prompt             */
+        gets(line);                                                           /*   read in the command line     */
         printf("\n");
         parse(line, argv);                /*   parse the line               */
         if (strcmp(argv[0], "exit") == 0) /* is it an "exit"?     */
