@@ -60,7 +60,7 @@ void execute(char **argv)
     { /* for the child process:         */
         if (execvp(*argv, argv) < 0)
         { /* execute the command  */
-            printf("*** ERROR: exec failed\n");
+            perror("Command error");
             exit(1);
         }
     }
@@ -100,6 +100,11 @@ void main(void)
         else if (strcmp(argv[0], "cd") == 0)
         {
             cd_case(argv);
+        }
+        else if (strcmp(argv[0], "clear") == 0)
+        {
+            execute(argv);
+            continue;
         }
         else
             execute(argv); /* otherwise, execute the command */
