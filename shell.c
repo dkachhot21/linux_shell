@@ -34,5 +34,5 @@ int main()
     int pid =fork();
     execvp(file,args);
     
-    return 0;
+    return main;
 }
