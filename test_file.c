@@ -68,6 +68,22 @@ void execute(char **argv)
     }
 }
 
+
+void command_input(char *line) {
+    int i = 0;
+    char character;
+    while ((character = getchar()) != EOF && i < size - 1) {
+        if (character == '\n') {
+            break; // Stop reading at newline
+        }
+        line[i] = character;
+        i++;
+    }
+    line[i] = '\0'; // Null-terminate the input
+}
+
+
+
 void main(void)
 {
     char line[size]; /* the input line                 */
@@ -76,12 +92,9 @@ void main(void)
     while (1)
     {                        /* repeat until done ....         */
         printf("Shell -> "); /*   display a prompt             */
-        if (fgets(line, sizeof(line), stdin) == NULL)
-        {
-            perror("Input error");
-            exit(1);
-        }                                   /*   read in the command line     */
+        command_input(line);                                  /*   read in the command line     */
         printf("\n");
+        // printf("%s",line);
         size_t len = strlen(line);
         if (len > 0 && line[len - 1] == '\n')
         {

@@ -23,8 +23,8 @@ void parse(char *line, char **argv)
 }
 
 void cd_case(char **argv)
-{
-    if (argv[1] == NULL)
+{    
+    if (argv[1] == NULL || *argv[1] == '~')
     {
         const char *home = getenv("HOME");
         if (home != NULL)
@@ -71,22 +71,33 @@ void execute(char **argv)
     }
 }
 
+
+void command_input(char *line) {
+    int i = 0;
+    char character;
+    while ((character = getchar()) != EOF && i < size - 1) {
+        if (character == '\n') {
+            break; // Stop reading at newline
+        }
+        line[i] = character;
+        i++;
+    }
+    line[i] = '\0'; // Null-terminate the input
+}
+
+
 void main(void)
 {
     char line[size]; /* the input line                 */
     char *argv[64];  /* the command line argument      */
-    clear();
+    // clear();
 
     while (1)
     { /* repeat until done ....         */
         char *username = getenv("USER");
         char *dir = getcwd(NULL, 0);
         printf("\033[0;32m%s\033[0m:\033[0;34m%s\033[0m$ ", username, dir); /*   display a prompt             */
-        if (fgets(line, size, stdin) == NULL)
-        {
-            perror("Input error");
-            exit(1);
-        } /*   read in the command line     */
+        command_input(line); /*   read in the command line     */
         size_t len = strlen(line);
         if (len > 0 && line[len - 1] == '\n') // remove new line from the end of input
         {
